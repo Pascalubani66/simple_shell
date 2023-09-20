@@ -1,62 +1,114 @@
 #include "shell.h"
 
 /**
-*size_t - the return type of the function
-*cust_strlen: the identifier used to call function
-*inpstr: pointer to a constant character
-Return: length
-*/
+ * _strdup - returns a pointer to a newly allocated space in memory, which
+ * contains a copy of the string given as a parameter
+ * @str: pointer to a string
+ * Return: pointer to a string
+ */
+char *_strdup(char *str)
+{
+	int i, l;
+	char *new;
 
-size_t cust_strlen(const char *inpstr)
-{
-size_t length = 0;
-while (inpstr[length] != '\0')
-{
-length++;
-}
-return length;
+	if (!str)
+	{
+		return (NULL);
+	}
+	for (l = 0; str[l] != '\0';)
+	{
+		l++;
+	}
+	new = malloc(sizeof(char) * l + 1);
+	if (!new)
+	{
+		return (NULL);
+	}
+	for (i = 0; i < l; i++)
+	{
+		new[i] = str[i];
+	}
+	new[l] = str[l];
+	return (new);
 }
 
 /**
-*int - the return type of the function
-*cust_strcmp: identifier to call function
-**1st: parameter of function
-**2st: parameter of funcion
-*Return: an integer value
-*/
+ * concat_all - concats 3 strings in a newly allocated memory
+ * @name: first string
+ * @sep: second string
+ * @value: Third string
+ * Return: pointer to the new string
+ */
+char *concat_all(char *name, char *sep, char *value)
+{
+	char *result;
+	int l1, l2, l3, i, k;
 
-int c_strcmp(const char *s1t, const char *s2t)//function to compare two strings//
-while (*s1t != '\0' && *s2t != '\0') {
-        if (*s1t != *s2t) {
-            return (*s1t - *s2t);
-        }
-        s1t++;
-        s2t++;
-    }
-    return (*s1t - *s2t);
+	l1 = _strlen(name);
+	l2 = _strlen(sep);
+	l3 = _strlen(value);
+
+	result = malloc(l1 + l2 + l3 + 1);
+	if (!result)
+		return (NULL);
+
+	for (i = 0; name[i]; i++)
+		result[i] = name[i];
+	k = i;
+
+	for (i = 0; sep[i]; i++)
+		result[k + i] = sep[i];
+	k = k + i;
+
+	for (i = 0; value[i]; i++)
+		result[k + i] = value[i];
+	k = k + i;
+
+	result[k] = '\0';
+
+	return (result);
 }
 
-char *c_str_chr(const char *string, int character)
+/**
+ * _strlen - it gives the length of a string
+ * @s: pointer to the string
+ * Return: the length of string
+ */
+int _strlen(char *s)
+{
+	int i = 0;
 
-{
-if (str == NULL)
-{
-return NULL;
-}
-return strchr(str, character);
+	while (*(s + i) != '\0')
+	{
+		i++;
+	}
+	return (i);
 }
 
-char *c_strdu_p(const char *string) 
+/**
+ * _putchar - writes the character c to stdout
+ * @c: The character to print
+ *
+ * Return: On success 1.
+ * On error, -1 is returned, and errno is set appropriately.
+ */
+int _putchar(char c)
 {
-    if (string == NULL) 
-{
-perror("Value is NULL");
-exit(1); // Handle memory allocation error gracefully
+	return (write(1, &c, 1));
 }
-char *val = strdup(str); // Allocate memory and copy the value
-if (val == NULL)
+
+/**
+ * _puts - prints a string
+ * @str: pointer to string
+ */
+
+void _puts(char *str)
 {
-perror("Memory allocation failed");
-exit(1); // Handle memory allocation error gracefully
+	int i = 0;
+
+	while (str[i])
+	{
+		_putchar(str[i]);
+		i++;
+	}
 }
-return val;

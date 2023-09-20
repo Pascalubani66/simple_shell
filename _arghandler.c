@@ -1,95 +1,137 @@
 #include "shell.h"
 
-int take_cmd(char *prmpt)
+
+/**
+ * splitstring - splits a string and makes it an array of pointers to words
+ * @str: the string to be split
+ * @delim: the delimiter
+ * Return: array of pointers to words
+ */
+
+char **splitstring(char *str, const char *delim)
 {
-	ssize_t size_ofchar_read = read(STDIN_FILENO, prmpt, MAX_DISPLAY_LENGTH);
-	if (size_ofchar_read < 0)
+	int i, wn;
+	char **array;
+	char *token;
+	char *copy;
+
+	copy = malloc(_strlen(str) + 1);
+	if (copy == NULL)
 	{
-	perror("Input error");
-	exit(1);
+		perror(_getenv("_"));
+		return (NULL);
 	}
-    else if (size_ofchar_read == 0)
-    {
-        // Handle end of file (Ctrl+D)
-        write(STDOUT_FILENO, "\n", 1);
-        exit(0);
-    }
-    prmpt[size_ofchar_read] = '\0';
-    return size_ofchar_read;
+	i = 0;
+	while (str[i])
+	{
+		copy[i] = str[i];
+		i++;
+	}
+	copy[i] = '\0';
+
+	token = strtok(copy, delim);
+	array = malloc((sizeof(char *) * 2));
+	array[0] = _strdup(token);
+
+	i = 1;
+	wn = 3;
+	while (token)
+	{
+		token = strtok(NULL, delim);
+		array = _realloc(array, (sizeof(char *) * (wn - 1)), (sizeof(char *) * wn));
+		array[i] = _strdup(token);
+		i++;
+		wn++;
+	}
+	free(copy);
+	return (array);
 }
 
-void exec_prmpt(char *command_line)
+/**
+ * execute - executes a command
+ * @argv: array of arguments
+ */
+
+void execute(char **argv)
 {
-    char *cmd[MAXIMUM_COMMAND];
-    int cmdval = 0;
-    char *tokn = strtok(command_line, " ");
 
-    while (tokn != NULL && cmdval < MAXIMUM_COMMAND - 1)
-    {
-        cmd[cmdval++] = tokn;
-        tokn = strtok(NULL, " ");
-    }
+	int d, status;
 
-    cmd[cmdval] = NULL;
+	if (!argv || !argv[0])
+		return;
+	d = fork();
+	if (d == -1)
+	{
+		perror(_getenv("_"));
+	}
+	if (d == 0)
+	{
+		execve(argv[0], argv, environ);
+			perror(argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	wait(&status);
+}
 
-    if (cmdval > 0 && c_strcmp(cmd[0], "exit") == 0)
-    {
-        exit(0);
-    }
+/**
+ * _realloc - Reallocates memory block
+ * @ptr: previous pointer
+ * @old_size: old size of previous pointer
+ * @new_size: new size for our pointer
+ * Return: New resized Pointer
+ */
 
-    char *path = _custgetenv("PATH");
-    if (path != NULL)
-    {
-	    char *tokn - strtok(path, ":");
-	    while (tokn != NULL)
-	    {
-		    char entirepath[MAXIMUM_COMMAND];
-		    char *ptr = entirepath;
-		    while (*tokn != '\0')
-		    {
-			    *ptr++ = *tokn++;
-		    }
-		    *ptr++ = '/';
-		    char *cmdptr = cmd[0];
-		    while (*cmdptr != '\0')
-		    {
-			    *ptr++ = *cmdptr++;
-		    }
-		    *ptr = '\0';
-		    if (access(entirepath, X_OK) == 0)
-		    {
-			    pid_t child_processid = fork();
-			    if (child_processid < 0)
-			    {
-				    perror("Fork Failed");
-				    exit(1);
-			    }
-			    else if (child_processid == 0)
-			    {
-				    if (execve(entirepath, cmd, NULL) >= 0)
-				    {
-					    exit(0);
-				    }
-				    else
-				    {
-					    char error_message[] = "Command not found: ";
-					    write(STDERR_FILENO, error_message, strlen(error_message));
-        exit(1);
-    }
-			    }
-			    else
-			    {
-				    int report;
-				    waitpid(child_processid, &report, 0);
-				    return;
-			    }
-		    }
-		    
-		    tokn = strtok(NULL, ":");
-	    }
-    }
-    char error_message[] = "command not found: ";
-    write(STDERR_FILENO, error_message, cust_strlen(error_message));
-    write(STDERR_FILENO, cmd[0], cust_strlen(cmd[0]));
-    write(STDERR_FILENO, "\n", 1);
+void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size)
+{
+	char *new;
+	char *old;
+
+	unsigned int i;
+
+	if (ptr == NULL)
+		return (malloc(new_size));
+
+	if (new_size == old_size)
+		return (ptr);
+
+	if (new_size == 0 && ptr != NULL)
+	{
+		free(ptr);
+		return (NULL);
+	}
+
+	new = malloc(new_size);
+	old = ptr;
+	if (new == NULL)
+		return (NULL);
+
+	if (new_size > old_size)
+	{
+		for (i = 0; i < old_size; i++)
+			new[i] = old[i];
+		free(ptr);
+		for (i = old_size; i < new_size; i++)
+			new[i] = '\0';
+	}
+	if (new_size < old_size)
+	{
+		for (i = 0; i < new_size; i++)
+			new[i] = old[i];
+		free(ptr);
+	}
+	return (new);
+}
+
+/**
+ * freearv - frees the array of pointers arv
+ *@arv: array of pointers
+ */
+
+void freearv(char **arv)
+{
+	int i;
+
+	for (i = 0; arv[i]; i++)
+		free(arv[i]);
+	free(arv);
 }

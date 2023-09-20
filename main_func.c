@@ -1,43 +1,89 @@
 #include "shell.h"
 
-int main()
+/**
+ * sig_handler - checks if Ctrl C is pressed
+ * @sig_num: int
+ */
+void sig_handler(int sig_num)
 {
-	char prmpt[MAX_DISPLAY_LENGTH];
-	while (1)
+	if (sig_num == SIGINT)
 	{
-		write(STDOUT_FILENO, "#cisfun$ ", 9);
-		if (take_cmd(prmpt) == 0)
+		_puts("\n#cisfun$ ");
+	}
+}
+
+/**
+* _EOF - handles the End of File
+* @len: return value of getline function
+* @buff: buffer
+ */
+void _EOF(int len, char *buff)
+{
+	(void)buff;
+	if (len == -1)
+	{
+		if (isatty(STDIN_FILENO))
 		{
-			continue;
+			_puts("\n");
+			free(buff);
 		}
-		
-		prmpt[cust_strlen(prmpt) - 1] = '\0';
-		
-		if (c_strcmp(prmpt, "exit") == 0)
-		
-		{
-			exit(0);
-		}
-		else if (c_strcmp(prmpt, "env") == 0)
-		{
-			prnt_environ();
-		}
+		exit(0);
+	}
+}
+/**
+  * _isatty - verif if terminal
+  */
+
+void _isatty(void)
+{
+	if (isatty(STDIN_FILENO))
+		_puts("#cisfun$ ");
+}
+/**
+ * main - Shell
+ * Return: 0 on success
+ */
+
+int main(void)
+{
+	ssize_t len = 0;
+	char *buff = NULL, *value, *pathname, **arv;
+	size_t size = 0;
+	list_path *head = '\0';
+	void (*f)(char **);
+
+	signal(SIGINT, sig_handler);
+	while (len != EOF)
+	{
+		_isatty();
+		len = getline(&buff, &size, stdin);
+		_EOF(len, buff);
+		arv = splitstring(buff, " \n");
+		if (!arv || !arv[0])
+			execute(arv);
 		else
 		{
-			char *_execpath = find_executable(prmpt);
-			if (_execpath != NULL)
+			value = _getenv("PATH");
+			head = linkpath(value);
+			pathname = _which(arv[0], head);
+			f = checkbuild(arv);
+			if (f)
 			{
-				exec_prmpt(_execpath);
-				free(_execpath);
+				free(buff);
+				f(arv);
 			}
-			else
+			else if (!pathname)
+				execute(arv);
+			else if (pathname)
 			{
-				char error_message[] = "Command not found: ";
-				write(STDERR_FILENO, error_message, cust_strlen(error_message));
-				write(STDERR_FILENO, prmpt, cust_strlen(prmpt));
-				write(STDERR_FILENO, "\n", 1);
+				free(arv[0]);
+				arv[0] = pathname;
+				execute(arv);
 			}
 		}
 	}
-	return 0;
+	free_list(head);
+	freearv(arv);
+	free(buff);
+	return (0);
 }
