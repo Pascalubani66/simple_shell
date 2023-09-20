@@ -25,22 +25,21 @@ void prnt_environ(void);
  */
 char *_cust_getenv(const char *argname);
 {
-
-	while (*env_var_ptr != NULL)
-	{
-		char *env_var = *env_var_ptr;
-		int len = 0;
-
-		while (env_var[len] != '=' && env_var[len] != '\0')
+	extern char **environ
+		for (char **env = environ; *env != NULL; env++)
 		{
-			len++;
+			char *env_var = *env;
+			int len = 0;
+			
+			while (env_var[len] != '=' && env_var[len] != '\0')
+			{
+				len++;
+			}
+			if (env_var[len] == '=' && cust_strlen(argname) == len && c_strcmp(argname, env_var) == 0)
+			{
+				return (&env_var[len + 1]);
+			}
 		}
-		if (env_var[len] == '=' && cust_strlen(argname) == len && c_strcmp(argname, env_var) == 0)
-		{
-			return (&env_var[len + 1]);
-		}
-		env_var_ptr++;
-	}
 	return (NULL);
 }
 
