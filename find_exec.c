@@ -1,6 +1,5 @@
 #include "shell.h"
 
-extern char **environ
 char *_custgetenv(char *argname) 
 {
     if (argname == NULL)
@@ -31,55 +30,13 @@ char *_custgetenv(char *argname)
 
 return NULL; // Variable not found
 }
-
-void my_mem_cpy(char *dest, const char *src, size_t n)
+void prnt_environ()
 {
-	for (size_t h = 0; h < n; h++)
+	char **env_ptr = environ;
+	while (*env_ptr != NULL)
 	{
-		dest[h] = src[h];
+		write(STDOUT_FILENO, *env_ptr, cust_strlen(*env_ptr));
+		write(STDOUT_FILENO, "\n", 1);
+		env_ptr++;
 	}
-}
-
-char *find_executable(char *cmd)
-{
-    // Get the PATH environment variable
-    char *val_of_path = _custgetenv("PATH");
-    if (val_of_path == NULL)
-    {
-        perror("Unable to get PATH environment variable");
-        exit(1);
-    }
-
-    // Tokenize the PATH into directories
-    char *tokn = strtok(val_of_path, ":");
-    while (tokn != NULL)
-    {
-        // Construct the full path to the executable
-        char entire_path[MAXIMUM_COMMAND];
-	size_t tokn_length = cust_strlen(tokn);
-	size_t cmd_len = cust_strlen(cmd);
-
-	write(STDOUT_FILENO, tokn, tokn_len);
-	write(STDOUT_FILENO, "/", 1);
-	write(STDOUT_FILENO, cmd, cmd_len);
-	write(STDOUT_FILENO, "\0", 1);
-
-        // Check if the executable file exists
-        if (access(entire_path, X_OK) == 0)
-        {
-            // Allocate memory for the full path and return it
-            char *execpath = (char *)malloc(cust_strlen(entirepath) + 1);
-            if (execpath == NULL)
-            {
-                perror("Memory allocation failed");
-                exit(1);
-            }
-             cust_memcpy(execpath, entire_path, cust_strlen(entire_path) + 1);
-	     return execpath;
-        }
-
-        tokn = strtok(NULL, ":");
-    }
-
-    return NULL; // Command not found in any directory
 }
