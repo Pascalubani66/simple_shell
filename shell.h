@@ -14,17 +14,13 @@ int take_cmd(char *prmpt);
 void parse_prmpt(char *prmpt, char **command);
 void exec_prmpt(char **command);
 char *myown_strcat(char *dest, const char *src);
-char *ptr = destination;
 size_t cust_strlen(const char *inpstr);
-int c_strcmp(const char *1st, const char *2st);
+int c_strcmp(const char *s1t, const char *s2t);
 char *concat_str(char *destination, const char *source);
-char *find_executable(char *cmd)
-
 
 //functions for environment variables//	
+void prnt_environ(void);
 char *_cust_getenv(const char *argname)
-extern char **environ
-void prnt_environ(void)
 
 #endif
 

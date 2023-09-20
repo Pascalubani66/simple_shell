@@ -3,7 +3,7 @@
  * prnt_environ- function that will print environment variables
  */
 
-void prnt_environ(void)
+void prnt_environ(void);
 {
 	char **env_var_ptr;
 
@@ -23,7 +23,7 @@ void prnt_environ(void)
  *
  * Return: NULL or if found, the value of the environment
  */
-char *_cust_getenv(const char *argname)
+char *_cust_getenv(const char *argname);
 {
 
 	while (*env_var_ptr != NULL)

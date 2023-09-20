@@ -25,15 +25,15 @@ return length;
 *Return: an integer value
 */
 
-int c_strcmp(const char *1st, const char *2st)//function to compare two strings//
-while (*1st != '\0' && *2st != '\0') {
-        if (*1st != *2st) {
-            return (*1st - *2st);
+int c_strcmp(const char *s1t, const char *s2t)//function to compare two strings//
+while (*s1t != '\0' && *s2t != '\0') {
+        if (*s1t != *s2t) {
+            return (*s1t - *s2t);
         }
-        1st++;
-        2st++;
+        s1t++;
+        s2t++;
     }
-    return (*1st - *2st);
+    return (*s1t - *s2t);
 }
 
 char *c_str_chr(const char *string, int character)
