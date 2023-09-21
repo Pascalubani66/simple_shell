@@ -63,5 +63,8 @@ void _unsetenv(char **arv);
 void freearv(char **arv);
 void free_list(list_path *head);
 
+void *a_custom_realloc(void *ptr, size_t old_size, size_t new_size);
+void *my_mem_cpy(void *dest, const void *src, size_t n);
+char *my_get_line(void)
 
 #endif

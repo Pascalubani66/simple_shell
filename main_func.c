@@ -50,7 +50,6 @@ int main(void)
 {
 	ssize_t len = 0;
 	char **arv;
-	size_t size = 0;
 	list_path *head = NULL;
 	void (*f)(char **);
 	char *pathname;
@@ -59,21 +58,24 @@ int main(void)
 	signal(SIGINT, SIG_IGN);
 	while (1)
 	{
+		int pid = fork();
 		_puts("#cisfun$ ");
-		len = getline(&buff, &size, stdin);
+	size_t len = my_get_line(&buff, &size, stdin);
 		_EOF(len, buff);
 
-		if (len > 0)
+		if (len == -1)
 		{
-			int pid = fork();
-			
+			perror("my_get_line");
+			break;
+		}
+		if (len > 0)
+		{	
 			arv = splitstring(buff, " \n");
 			if (!arv || !arv[0])
 			{
 				free(arv);
 				continue;
 			}
-
 			pathname = _which(arv[0], head);
 			f = checkbuild(arv);
 
@@ -110,10 +112,12 @@ int main(void)
 			}
 			
 			free(arv);
-		}
-	}
-	free_list(head);
-	free(buff);
-
-	return (0);
-}
+			{
+			{
+				free_list(head);
+				free(buff);
+				buff = NULL;
+				size = 0;
+			}
+			return (0);
+			}
