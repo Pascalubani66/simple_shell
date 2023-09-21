@@ -30,5 +30,5 @@ void(*checkbuild(char **arv))(char **arv)
 				return (T[i].func);
 		}
 	}
-	return (0);
+	return (NULL);
 }

@@ -47,21 +47,23 @@ void _isatty(void)
 int main(void)
 {
 	ssize_t len = 0;
-	char *buff = NULL, *value, *pathname, **arv;
+	char *buff = NULL, **arv;
 	size_t size = 0;
-	list_path *head = '\0';
+	list_path *head = NULL;
 	void (*f)(char **);
+	char  *value, *pathname;
 
 	signal(SIGINT, sig_handler);
-	while (len != EOF)
+	while (1)
 	{
 		_isatty();
 		len = getline(&buff, &size, stdin);
 		_EOF(len, buff);
+
 		arv = splitstring(buff, " \n");
 		if (!arv || !arv[0])
-			execute(arv);
-		else
+			free(arv);
+		continue;
 		{
 			value = _getenv("PATH");
 			head = linkpath(value);
@@ -80,10 +82,12 @@ int main(void)
 				arv[0] = pathname;
 				execute(arv);
 			}
+			
+			free(arv);
 		}
 	}
 	free_list(head);
-	freearv(arv);
 	free(buff);
+
 	return (0);
 }

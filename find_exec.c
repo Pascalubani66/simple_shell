@@ -8,31 +8,28 @@
  */
 char *_getenv(const char *name)
 {
-	int i, j;
-	char *value;
+	int i;
 
 	if (!name)
-		return (NULL);
+		return NULL;
+
 	for (i = 0; environ[i]; i++)
 	{
-		j = 0;
-		if (name[j] == environ[i][j])
+		char *env_var = environ[i];
+		int j;
+		
+		for (j = 0; name[j] != '\0'; j++)
 		{
-			while (name[j])
-			{
-				if (name[j] != environ[i][j])
-					break;
-
-				j++;
-			}
-			if (name[j] == '\0')
-			{
-				value = (environ[i] + j + 1);
-				return (value);
-			}
+			if (name[j] != env_var[j])
+				break;
+		}
+		if (name[j] == '\0' && env_var[j] == '=')
+		{
+			return &env_var[j + 1];
 		}
 	}
-	return (0);
+	
+	return NULL;
 }
 
 
@@ -109,20 +106,25 @@ list_path *linkpath(char *path)
  */
 char *_which(char *filename, list_path *head)
 {
-	struct stat st;
 	char *string;
-
 	list_path *tmp = head;
+	char *path = _getenv("PATH");
 
 	while (tmp)
 	{
-
-		string = concat_all(tmp->dir, "/", filename);
-		if (stat(string, &st) == 0)
+		char *token = strtok(path, ":");
+		while (token)
 		{
-			return (string);
+			string = concat_all(token, "/", filename);
+
+			if (access(string, X_OK) == 0)
+			{
+				return string;
+			}
+			free(string);
+			token = strtok(NULL, ":");
 		}
-		free(string);
+		
 		tmp = tmp->p;
 	}
 

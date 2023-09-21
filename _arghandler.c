@@ -10,40 +10,36 @@
 
 char **splitstring(char *str, const char *delim)
 {
-	int i, wn;
-	char **array;
+	int i = 0;
+	int j;
+	char **array = malloc(sizeof(char *) * 2);
 	char *token;
-	char *copy;
 
-	copy = malloc(_strlen(str) + 1);
-	if (copy == NULL)
+	if (!array)
 	{
 		perror(_getenv("_"));
 		return (NULL);
 	}
-	i = 0;
-	while (str[i])
-	{
-		copy[i] = str[i];
-		i++;
-	}
-	copy[i] = '\0';
 
-	token = strtok(copy, delim);
-	array = malloc((sizeof(char *) * 2));
-	array[0] = _strdup(token);
-
-	i = 1;
-	wn = 3;
+	token = strtok(str, delim);
 	while (token)
 	{
-		token = strtok(NULL, delim);
-		array = _realloc(array, (sizeof(char *) * (wn - 1)), (sizeof(char *) * wn));
 		array[i] = _strdup(token);
+		if (!array[i])
+		{
+			perror(_getenv("-"));
+			for (j = 0; j < i; j++)
+			{
+				free(array[j]);
+			}
+			free(array);
+			return (NULL);
+		}
 		i++;
-		wn++;
+		token = strtok(NULL, delim);
+		array = _realloc(array, sizeof(char *) * i, sizeof(char *) * (i + 2));
+		array[i] = NULL;
 	}
-	free(copy);
 	return (array);
 }
 
@@ -55,22 +51,30 @@ char **splitstring(char *str, const char *delim)
 void execute(char **argv)
 {
 
-	int d, status;
+	pid_t pid;
+	int status;
 
-	if (!argv || !argv[0])
-		return;
-	d = fork();
-	if (d == -1)
+	pid = fork();
+
+	if (pid == 0)
 	{
-		perror(_getenv("_"));
-	}
-	if (d == 0)
-	{
-		execve(argv[0], argv, environ);
-			perror(argv[0]);
+		if (execve(argv[0], argv, NULL) == -1)
+		{
+			perror("execve");
+		}
 		exit(EXIT_FAILURE);
 	}
-	wait(&status);
+	else if (pid < 0)
+	{
+		perror("fork");
+	}
+	{
+		do
+		{
+			waitpid(pid, &status, WUNTRACED);
+		}
+		while (!WIFEXITED(status) && !WIFSIGNALED(status));
+	}
 }
 
 /**
