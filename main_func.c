@@ -43,17 +43,20 @@ void _isatty(void)
  * main - Shell
  * Return: 0 on success
  */
-
+char *buff = NULL;
+char **arv;
+size_t size = 0;
 int main(void)
 {
 	ssize_t len = 0;
-	char *buff = NULL, **arv;
+	char **arv;
 	size_t size = 0;
 	list_path *head = NULL;
 	void (*f)(char **);
-	char  *value, *pathname;
+	char *pathname;
+	int status;
 
-	signal(SIGINT, sig_handler);
+	signal(SIGINT, SIG_IGN);
 	while (1)
 	{
 		_puts("#cisfun$ ");
@@ -62,16 +65,18 @@ int main(void)
 
 		if (len > 0)
 		{
-		arv = splitstring(buff, " \n");
-		if (!arv || !arv[0])
-		{
-		free(arv);
-		continue;
-		}
-			value = _getenv("PATH");
-			head = linkpath(value);
+			int pid = fork();
+			
+			arv = splitstring(buff, " \n");
+			if (!arv || !arv[0])
+			{
+				free(arv);
+				continue;
+			}
+
 			pathname = _which(arv[0], head);
 			f = checkbuild(arv);
+
 			if (f)
 			{
 				f(arv);
@@ -84,7 +89,24 @@ int main(void)
 			{
 				free(arv[0]);
 				arv[0] = pathname;
-				execute(arv);
+
+				if (pid == 0)
+				{
+					execute(arv);
+					exit(EXIT_SUCCESS);
+				}
+				else if (pid < 0)
+				{
+					perror("fork");
+				}
+				else
+				{
+					do
+					{
+						waitpid(pid, &status, WUNTRACED);
+					}
+					while (!WIFEXITED(status) && !WIFSIGNALED(status));
+				}
 			}
 			
 			free(arv);
